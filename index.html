@@ -20,14 +20,37 @@
     body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; padding: 20px 12px; }
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
 
-    .header-card { background-color: var(--card-bg); padding: 20px; border-radius: 20px; text-align: center; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-    .header-card h1 { font-size: 1.4rem; color: var(--primary-accent); }
-    .header-card p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
-    
-    .admin-toggle-btn {
-      position: absolute; top: 15px; right: 15px; background: var(--tag-bg); border: none;
-      color: var(--primary-accent); padding: 5px 10px; border-radius: 10px; font-size: 0.75rem; cursor: pointer; font-weight: bold;
+    /* 頁頭區 */
+    .header-card { 
+      background-color: var(--card-bg); 
+      padding: 22px 40px 20px 20px; 
+      border-radius: 20px; 
+      text-align: center; 
+      position: relative; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
     }
+    .header-card h1 { font-size: 1.3rem; color: var(--primary-accent); word-break: break-word; line-height: 1.3; }
+    .header-card p { font-size: 0.85rem; color: var(--text-sub); margin-top: 6px; }
+    
+    /* 簡化為僅 Icon 的後台按鈕 */
+    .admin-icon-btn {
+      position: absolute; 
+      top: 16px; 
+      right: 16px; 
+      background: var(--tag-bg); 
+      border: none;
+      color: var(--primary-accent); 
+      width: 32px;
+      height: 32px;
+      border-radius: 50%; 
+      font-size: 1rem; 
+      cursor: pointer; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .admin-icon-btn:hover { background: var(--border-color); }
 
     .section-card { background-color: var(--card-bg); padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
@@ -74,9 +97,9 @@
   <div class="app-container" id="app">
     
     <div class="header-card">
-      <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 後台管理</button>
-      <h1>A Care Corner｜懶人精緻選物所 </h1>
-      <p>日常好物與雜貨小店</p>
+      <button class="admin-icon-btn" onclick="toggleAdmin()" title="後台管理">⚙️</button>
+      <h1>A Care Corner｜懶人精緻選物所</h1>
+      <p>二手日常好物與精選雜貨</p>
     </div>
 
     <div class="section-card">
@@ -105,7 +128,7 @@
 
     <div class="section-card">
       <div class="section-title">💬 一般問題查詢</div>
-      <a href="https://api.whatsapp.com/send?phone=85291703190&text=你好！想查詢關於雜貨店的相關問題。" target="_blank" class="whatsapp-btn">
+      <a href="https://api.whatsapp.com/send?phone=85291703190&text=你好！想查詢關於 A Care Corner 的相關問題。" target="_blank" class="whatsapp-btn">
         💬 一鍵聯絡店主查詢
       </a>
     </div>
@@ -137,6 +160,8 @@
   </div>
 
   <script>
+    // 您可以修改引號內的數字作為您的後台密碼
+    const ADMIN_PASSWORD = "0129"; 
     const PHONE_NUMBER = "85291703190";
 
     // 預設示範物品
@@ -154,7 +179,6 @@
       
       products.forEach((p, index) => {
         const waText = encodeURIComponent(`你好！我想查詢「${p.title}」是否有貨？`);
-        // 使用 API 連結，介面完全隱藏電話號碼
         const waLink = `https://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${waText}`;
 
         list.innerHTML += `
@@ -178,7 +202,7 @@
       });
     }
 
-    // 新增物品 (含圖片轉 Base64)
+    // 新增物品
     function addProduct() {
       const title = document.getElementById('p-title').value.trim();
       const price = document.getElementById('p-price').value.trim();
@@ -205,7 +229,6 @@
       localStorage.setItem('my_store_products', JSON.stringify(products));
       renderProducts();
 
-      // 清空欄位
       document.getElementById('p-title').value = '';
       document.getElementById('p-price').value = '';
       document.getElementById('p-desc').value = '';
@@ -222,9 +245,23 @@
       }
     }
 
-    // 開關管理員模式
+    // 開關管理員模式（含密碼驗證）
     function toggleAdmin() {
-      document.getElementById('app').classList.toggle('admin-mode');
+      const app = document.getElementById('app');
+      const isAlreadyAdmin = app.classList.contains('admin-mode');
+
+      if (isAlreadyAdmin) {
+        // 如果已經在管理員模式，點擊直接退出
+        app.classList.remove('admin-mode');
+      } else {
+        // 彈出密碼輸入框
+        const pwd = prompt("請輸入管理員密碼：");
+        if (pwd === ADMIN_PASSWORD) {
+          app.classList.add('admin-mode');
+        } else if (pwd !== null) {
+          alert("密碼錯誤！無法進入後台。");
+        }
+      }
     }
 
     // 計算器
