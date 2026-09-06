@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>康健集 Care Collection</title>
+  <title>康健集 Care Collection - 雜貨小店</title>
   <style>
     :root {
       --bg-color: #f7f3f0;
@@ -16,334 +16,236 @@
       --tag-bg: #f5ebe6;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; padding: 20px 12px; }
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+
+    .header-card { background-color: var(--card-bg); padding: 20px; border-radius: 20px; text-align: center; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    .header-card h1 { font-size: 1.4rem; color: var(--primary-accent); }
+    .header-card p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+    
+    .admin-toggle-btn {
+      position: absolute; top: 15px; right: 15px; background: var(--tag-bg); border: none;
+      color: var(--primary-accent); padding: 5px 10px; border-radius: 10px; font-size: 0.75rem; cursor: pointer; font-weight: bold;
     }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      padding: 20px 12px;
-    }
+    .section-card { background-color: var(--card-bg); padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
 
-    .app-container {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .header-card {
-      background-color: var(--card-bg);
-      padding: 20px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-
-    .header-card h1 {
-      font-size: 1.4rem;
-      color: var(--primary-accent);
-      letter-spacing: 1px;
-    }
-
-    .header-card p {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      margin-top: 4px;
-    }
-
-    .section-card {
-      background-color: var(--card-bg);
-      padding: 18px;
-      border-radius: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-
-    .section-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    /* 後台新增商品控制板 */
+    .admin-panel { display: none; background: #faf3f0; border: 1px dashed var(--primary-accent); padding: 14px; border-radius: 14px; margin-bottom: 16px; }
+    .admin-mode .admin-panel { display: block; }
+    .admin-panel label { font-size: 0.8rem; font-weight: bold; color: var(--text-main); display: block; margin-top: 8px; margin-bottom: 4px; }
+    .admin-panel input { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; background: white; }
+    .admin-panel button { width: 100%; padding: 10px; background: var(--primary-accent); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 12px; cursor: pointer; }
 
     /* 產品展示區 */
-    .product-item {
-      display: flex;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
+    .product-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color); position: relative; }
+    .product-item:last-child { border-bottom: none; }
+    .product-img { width: 75px; height: 75px; border-radius: 12px; background-color: var(--tag-bg); object-fit: cover; }
+    .product-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .product-title { font-size: 0.95rem; font-weight: 600; }
+    .product-price { font-size: 0.85rem; color: #b85b5b; font-weight: bold; margin-top: 2px; }
+    .product-desc { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; }
+    .product-action { display: flex; justify-content: flex-end; margin-top: 6px; }
+    
+    .inquire-link {
+      font-size: 0.8rem; color: white; background-color: var(--primary-accent);
+      text-decoration: none; font-weight: 600; padding: 6px 12px; border-radius: 8px;
     }
 
-    .product-item:last-child {
-      border-bottom: none;
-    }
+    .delete-btn { display: none; background: #e06d6d; color: white; border: none; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; float: right; }
+    .admin-mode .delete-btn { display: inline-block; }
 
-    .product-img {
-      width: 75px;
-      height: 75px;
-      border-radius: 12px;
-      background-color: var(--tag-bg);
-      object-fit: cover;
-    }
+    /* WhatsApp 區 */
+    .whatsapp-btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-accent); color: white; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.9rem; }
 
-    .product-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .product-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .product-desc {
-      font-size: 0.8rem;
-      color: var(--text-sub);
-    }
-
-    .product-action {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-    }
-
-    .buy-link {
-      font-size: 0.8rem;
-      color: var(--primary-accent);
-      text-decoration: none;
-      font-weight: 600;
-      padding: 4px 10px;
-      background-color: var(--tag-bg);
-      border-radius: 8px;
-    }
-
-    /* WhatsApp 自動化區 */
-    .whatsapp-btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary-accent);
-      color: white;
-      text-align: center;
-      text-decoration: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: background-color 0.2s;
-    }
-
-    .whatsapp-btn:hover {
-      background-color: var(--primary-hover);
-    }
-
-    /* 計算器 */
-    .calc-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .calc-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      background-color: #faf7f5;
-      font-size: 0.9rem;
-      outline: none;
-    }
-
-    .calc-btn {
-      width: 100%;
-      padding: 10px;
-      background-color: var(--primary-accent);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .calc-result {
-      margin-top: 10px;
-      padding: 12px;
-      background-color: var(--tag-bg);
-      border-radius: 10px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    /* 留言板 */
-    .comment-input-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .comment-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      background-color: #faf7f5;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    .comment-submit {
-      padding: 10px 16px;
-      background-color: var(--primary-accent);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .comment-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .comment-item {
-      padding: 8px 12px;
-      background-color: #faf7f5;
-      border-radius: 8px;
-      font-size: 0.8rem;
-    }
+    /* 計算器與留言板 */
+    .calc-row, .comment-input-group { display: flex; gap: 8px; margin-bottom: 8px; }
+    .calc-input, .comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background-color: #faf7f5; font-size: 0.9rem; outline: none; }
+    .calc-btn, .comment-submit { padding: 10px 16px; background-color: var(--primary-accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    .calc-result { margin-top: 10px; padding: 12px; background-color: var(--tag-bg); border-radius: 10px; text-align: center; font-weight: 600; }
+    .comment-list { display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; }
+    .comment-item { padding: 8px 12px; background-color: #faf7f5; border-radius: 8px; font-size: 0.8rem; }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
+  <div class="app-container" id="app">
     
     <div class="header-card">
+      <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 後台管理</button>
       <h1>康健集 • Care Collection</h1>
-      <p>專屬醫療護理與健康精選展示目錄</p>
+      <p>二手日常好物與雜貨小店</p>
     </div>
 
     <div class="section-card">
-      <div class="section-title">📦 精選產品目錄</div>
-      
-      <div class="product-item">
-        <img src="https://via.placeholder.com/75/f5ebe6/4a423e?text=代餐" class="product-img" alt="輕體代餐">
-        <div class="product-info">
-          <div>
-            <div class="product-title">營養平衡輕體代餐</div>
-            <div class="product-desc">高纖低卡，輕鬆補給每日所需營養。</div>
-          </div>
-          <div class="product-action">
-            <a href="https://your-meal-system-link.com" target="_blank" class="buy-link">前往專屬網站落單 ↗</a>
-          </div>
-        </div>
+      <div class="section-title">🛍️ 待售雜貨目錄</div>
+
+      <div class="admin-panel">
+        <b style="font-size:0.9rem; color:var(--primary-accent);">＋ 上架新雜貨</b>
+        
+        <label>物品名稱</label>
+        <input type="text" id="p-title" placeholder="例如：3M 醫療膠帶">
+        
+        <label>價格 (HK$)</label>
+        <input type="number" id="p-price" placeholder="例如：15">
+        
+        <label>物品簡述</label>
+        <input type="text" id="p-desc" placeholder="例如：全新未拆，多買轉讓">
+        
+        <label>上傳相片</label>
+        <input type="file" id="p-file" accept="image/*">
+
+        <button onclick="addProduct()">確認上架物品</button>
       </div>
 
-      <div class="product-item">
-        <img src="https://via.placeholder.com/75/f5ebe6/4a423e?text=洗頭水" class="product-img" alt="草本洗頭水">
-        <div class="product-info">
-          <div>
-            <div class="product-title">舒緩健髮草本洗頭水</div>
-            <div class="product-desc">溫和深層清潔，平衡頭皮油脂。</div>
-          </div>
-          <div class="product-action">
-            <a href="https://your-shampoo-system-link.com" target="_blank" class="buy-link">前往專屬網站落單 ↗</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="product-item">
-        <img src="https://via.placeholder.com/75/f5ebe6/4a423e?text=護理" class="product-img" alt="醫療膠帶">
-        <div class="product-info">
-          <div>
-            <div class="product-title">醫用低敏透氣膠帶</div>
-            <div class="product-desc">家用醫療必備，溫和不傷肌膚。</div>
-          </div>
-          <div class="product-action">
-            <span class="product-desc">請透過下方查詢</span>
-          </div>
-        </div>
-      </div>
+      <div id="product-list"></div>
     </div>
 
     <div class="section-card">
-      <div class="section-title">💬 即時產品查詢</div>
-      <a href="https://wa.me/85212345678?text=你好！我想查詢「康健集 Care Collection」的產品詳情與庫存。" 
-         target="_blank" 
-         class="whatsapp-btn">
-        一鍵啟動 WhatsApp 對話
+      <div class="section-title">💬 一般問題查詢</div>
+      <a href="https://api.whatsapp.com/send?phone=85291703190&text=你好！想查詢關於雜貨店的相關問題。" target="_blank" class="whatsapp-btn">
+        💬 一鍵聯絡店主查詢
       </a>
     </div>
 
     <div class="section-card">
-      <div class="section-title">🧮 預算小計算器</div>
+      <div class="section-title">🧮 幾件合購總額計算器</div>
       <div class="calc-row">
-        <input type="number" id="num1" class="calc-input" placeholder="金額 1 ($)">
-        <input type="number" id="num2" class="calc-input" placeholder="金額 2 ($)">
+        <input type="number" id="num1" class="calc-input" placeholder="物品 1 金額 ($)">
+        <input type="number" id="num2" class="calc-input" placeholder="物品 2 金額 ($)">
       </div>
       <div class="calc-row">
-        <input type="number" id="num3" class="calc-input" placeholder="金額 3 ($)">
-        <button onclick="calculateTotal()" class="calc-btn">計算總額</button>
+        <input type="number" id="num3" class="calc-input" placeholder="物品 3 金額 ($)">
+        <button onclick="calculateTotal()" class="calc-btn" style="width:100%;">計算總額</button>
       </div>
-      <div class="calc-result">
-        預估總金額： HK$ <span id="total-price">0</span>
-      </div>
+      <div class="calc-result">預估總金額： HK$ <span id="total-price">0</span></div>
     </div>
 
     <div class="section-card">
-      <div class="section-title">📝 顧客留言詢問</div>
+      <div class="section-title">📝 買家留言板</div>
       <div class="comment-input-group">
         <input type="text" id="comment-text" class="comment-input" placeholder="寫下您的查詢或建議...">
         <button onclick="addComment()" class="comment-submit">送出</button>
       </div>
       <div class="comment-list" id="comment-list">
-        <div class="comment-item"><b>顧客：</b>請問代餐有哪幾種口味？</div>
-        <div class="comment-item"><b>店主回覆：</b>你好！目前有可可與抹茶兩種口味喔～</div>
+        <div class="comment-item"><b>買家：</b>請問洗頭水可以在地鐵站交收嗎？</div>
       </div>
     </div>
 
   </div>
 
   <script>
-    // 計算器邏輯
+    const PHONE_NUMBER = "85291703190";
+
+    // 預設示範物品
+    const defaultProducts = [
+      { id: 1, title: '3M 醫療級透氣膠帶 (全新)', price: '15', desc: '買多了用不上，低價轉讓。', img: 'https://via.placeholder.com/75/f5ebe6/4a423e?text=膠帶' },
+      { id: 2, title: '舒緩健髮草本洗頭水 (95%新)', price: '45', desc: '僅試用過一次，香味不合故讓出。', img: 'https://via.placeholder.com/75/f5ebe6/4a423e?text=洗頭水' }
+    ];
+
+    let products = JSON.parse(localStorage.getItem('my_store_products')) || defaultProducts;
+
+    // 渲染雜貨列表
+    function renderProducts() {
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+      
+      products.forEach((p, index) => {
+        const waText = encodeURIComponent(`你好！我想查詢「${p.title}」是否有貨？`);
+        // 使用 API 連結，介面完全隱藏電話號碼
+        const waLink = `https://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${waText}`;
+
+        list.innerHTML += `
+          <div class="product-item">
+            <img src="${p.img}" class="product-img" alt="${p.title}">
+            <div class="product-info">
+              <div>
+                <div class="product-title">
+                  ${p.title} 
+                  <button class="delete-btn" onclick="deleteProduct(${index})">下架</button>
+                </div>
+                <div class="product-price">HK$ ${p.price}</div>
+                <div class="product-desc">${p.desc}</div>
+              </div>
+              <div class="product-action">
+                <a href="${waLink}" target="_blank" class="inquire-link">私訊查詢 💬</a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // 新增物品 (含圖片轉 Base64)
+    function addProduct() {
+      const title = document.getElementById('p-title').value.trim();
+      const price = document.getElementById('p-price').value.trim();
+      const desc = document.getElementById('p-desc').value.trim();
+      const fileInput = document.getElementById('p-file');
+
+      if (!title || !price) {
+        return alert('請至少填寫「物品名稱」與「價格」！');
+      }
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          saveProductData(title, price, desc, e.target.result);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        saveProductData(title, price, desc, 'https://via.placeholder.com/75/f5ebe6/4a423e?text=雜貨');
+      }
+    }
+
+    function saveProductData(title, price, desc, imgData) {
+      products.unshift({ id: Date.now(), title, price, desc, img: imgData });
+      localStorage.setItem('my_store_products', JSON.stringify(products));
+      renderProducts();
+
+      // 清空欄位
+      document.getElementById('p-title').value = '';
+      document.getElementById('p-price').value = '';
+      document.getElementById('p-desc').value = '';
+      document.getElementById('p-file').value = '';
+      alert('成功上架物品！');
+    }
+
+    // 刪除物品
+    function deleteProduct(index) {
+      if (confirm('確定下架這件物品？')) {
+        products.splice(index, 1);
+        localStorage.setItem('my_store_products', JSON.stringify(products));
+        renderProducts();
+      }
+    }
+
+    // 開關管理員模式
+    function toggleAdmin() {
+      document.getElementById('app').classList.toggle('admin-mode');
+    }
+
+    // 計算器
     function calculateTotal() {
       const v1 = parseFloat(document.getElementById('num1').value) || 0;
       const v2 = parseFloat(document.getElementById('num2').value) || 0;
       const v3 = parseFloat(document.getElementById('num3').value) || 0;
-      const total = v1 + v2 + v3;
-      document.getElementById('total-price').innerText = total;
+      document.getElementById('total-price').innerText = v1 + v2 + v3;
     }
 
-    // 留言板邏輯
+    // 留言板
     function addComment() {
       const input = document.getElementById('comment-text');
-      const text = input.value.trim();
-      if (text !== "") {
+      if (input.value.trim()) {
         const list = document.getElementById('comment-list');
-        const newItem = document.createElement('div');
-        newItem.className = 'comment-item';
-        newItem.innerHTML = `<b>訪客：</b>${text}`;
-        list.prepend(newItem);
-        input.value = "";
+        list.innerHTML = `<div class="comment-item"><b>訪客：</b>${input.value}</div>` + list.innerHTML;
+        input.value = '';
       }
     }
-  </script>
 
+    renderProducts();
+  </script>
 </body>
 </html>
-
