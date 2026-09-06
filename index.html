@@ -20,7 +20,7 @@
     body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; padding: 20px 12px; }
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
 
-    /* 頁頭區 */
+    /* 頁頭標題 */
     .header-card { 
       background-color: var(--card-bg); 
       padding: 22px 40px 20px 20px; 
@@ -29,10 +29,10 @@
       position: relative; 
       box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
     }
-    .header-card h1 { font-size: 1.3rem; color: var(--primary-accent); word-break: break-word; line-height: 1.3; }
+    .header-card h1 { font-size: 1.25rem; color: var(--primary-accent); word-break: break-word; line-height: 1.3; }
     .header-card p { font-size: 0.85rem; color: var(--text-sub); margin-top: 6px; }
     
-    /* 簡化為僅 Icon 的後台按鈕 */
+    /* 後台管理 Icon 按鈕 */
     .admin-icon-btn {
       position: absolute; 
       top: 16px; 
@@ -48,14 +48,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
     }
-    .admin-icon-btn:hover { background: var(--border-color); }
 
     .section-card { background-color: var(--card-bg); padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
 
-    /* 後台新增商品控制板 */
+    /* 後台面板 */
     .admin-panel { display: none; background: #faf3f0; border: 1px dashed var(--primary-accent); padding: 14px; border-radius: 14px; margin-bottom: 16px; }
     .admin-mode .admin-panel { display: block; }
     .admin-panel label { font-size: 0.8rem; font-weight: bold; color: var(--text-main); display: block; margin-top: 8px; margin-bottom: 4px; }
@@ -77,8 +75,10 @@
       text-decoration: none; font-weight: 600; padding: 6px 12px; border-radius: 8px;
     }
 
-    .delete-btn { display: none; background: #e06d6d; color: white; border: none; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; float: right; }
-    .admin-mode .delete-btn { display: inline-block; }
+    /* 管理員專用刪除/回覆按鈕 */
+    .admin-btn { display: none; background: #e06d6d; color: white; border: none; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; margin-left: 4px; }
+    .admin-reply-btn { background: var(--primary-accent); }
+    .admin-mode .admin-btn { display: inline-block; }
 
     /* WhatsApp 區 */
     .whatsapp-btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-accent); color: white; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.9rem; }
@@ -88,8 +88,12 @@
     .calc-input, .comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background-color: #faf7f5; font-size: 0.9rem; outline: none; }
     .calc-btn, .comment-submit { padding: 10px 16px; background-color: var(--primary-accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
     .calc-result { margin-top: 10px; padding: 12px; background-color: var(--tag-bg); border-radius: 10px; text-align: center; font-weight: 600; }
-    .comment-list { display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; }
-    .comment-item { padding: 8px 12px; background-color: #faf7f5; border-radius: 8px; font-size: 0.8rem; }
+    
+    /* 留言板列表 */
+    .comment-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+    .comment-item { padding: 10px 12px; background-color: #faf7f5; border-radius: 10px; font-size: 0.8rem; position: relative; }
+    .comment-reply { margin-top: 6px; padding: 6px 10px; background-color: #f0e6e1; border-radius: 6px; color: var(--text-main); font-size: 0.78rem; }
+    .empty-tip { font-size: 0.8rem; color: var(--text-sub); text-align: center; padding: 10px 0; }
   </style>
 </head>
 <body>
@@ -152,31 +156,31 @@
         <input type="text" id="comment-text" class="comment-input" placeholder="寫下您的查詢或建議...">
         <button onclick="addComment()" class="comment-submit">送出</button>
       </div>
-      <div class="comment-list" id="comment-list">
-        <div class="comment-item"><b>買家：</b>請問洗頭水可以在地鐵站交收嗎？</div>
-      </div>
+      <div class="comment-list" id="comment-list"></div>
     </div>
 
   </div>
 
   <script>
-    // 您可以修改引號內的數字作為您的後台密碼
-    const ADMIN_PASSWORD = "0129"; 
+    const ADMIN_PASSWORD = "1234"; 
     const PHONE_NUMBER = "85291703190";
 
-    // 預設示範物品
-    const defaultProducts = [
-      { id: 1, title: '3M 醫療級透氣膠帶 (全新)', price: '15', desc: '買多了用不上，低價轉讓。', img: 'https://via.placeholder.com/75/f5ebe6/4a423e?text=膠帶' },
-      { id: 2, title: '舒緩健髮草本洗頭水 (95%新)', price: '45', desc: '僅試用過一次，香味不合故讓出。', img: 'https://via.placeholder.com/75/f5ebe6/4a423e?text=洗頭水' }
+    // 從本地讀取商品與留言資料
+    let products = JSON.parse(localStorage.getItem('acc_products')) || [];
+    let comments = JSON.parse(localStorage.getItem('acc_comments')) || [
+      { id: 1, user: '買家', text: '請問洗頭水可以在地鐵站交收嗎？', reply: '可以的，詳情可以點擊 WhatsApp 聯絡～' }
     ];
 
-    let products = JSON.parse(localStorage.getItem('my_store_products')) || defaultProducts;
-
-    // 渲染雜貨列表
+    // 渲染商品
     function renderProducts() {
       const list = document.getElementById('product-list');
       list.innerHTML = '';
       
+      if (products.length === 0) {
+        list.innerHTML = '<div class="empty-tip">目前暫無待售物品，請點擊右上角 ⚙️ 上架物品。</div>';
+        return;
+      }
+
       products.forEach((p, index) => {
         const waText = encodeURIComponent(`你好！我想查詢「${p.title}」是否有貨？`);
         const waLink = `https://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${waText}`;
@@ -188,7 +192,7 @@
               <div>
                 <div class="product-title">
                   ${p.title} 
-                  <button class="delete-btn" onclick="deleteProduct(${index})">下架</button>
+                  <button class="admin-btn" onclick="deleteProduct(${index})">下架</button>
                 </div>
                 <div class="product-price">HK$ ${p.price}</div>
                 <div class="product-desc">${p.desc}</div>
@@ -202,7 +206,7 @@
       });
     }
 
-    // 新增物品
+    // 新增商品
     function addProduct() {
       const title = document.getElementById('p-title').value.trim();
       const price = document.getElementById('p-price').value.trim();
@@ -226,7 +230,7 @@
 
     function saveProductData(title, price, desc, imgData) {
       products.unshift({ id: Date.now(), title, price, desc, img: imgData });
-      localStorage.setItem('my_store_products', JSON.stringify(products));
+      localStorage.setItem('acc_products', JSON.stringify(products));
       renderProducts();
 
       document.getElementById('p-title').value = '';
@@ -236,30 +240,81 @@
       alert('成功上架物品！');
     }
 
-    // 刪除物品
     function deleteProduct(index) {
       if (confirm('確定下架這件物品？')) {
         products.splice(index, 1);
-        localStorage.setItem('my_store_products', JSON.stringify(products));
+        localStorage.setItem('acc_products', JSON.stringify(products));
         renderProducts();
       }
     }
 
-    // 開關管理員模式（含密碼驗證）
+    // 渲染留言板
+    function renderComments() {
+      const list = document.getElementById('comment-list');
+      list.innerHTML = '';
+
+      if (comments.length === 0) {
+        list.innerHTML = '<div class="empty-tip">暫無留言</div>';
+        return;
+      }
+
+      comments.forEach((c, index) => {
+        const replyHtml = c.reply ? `<div class="comment-reply"><b>店主回覆：</b>${c.reply}</div>` : '';
+        list.innerHTML += `
+          <div class="comment-item">
+            <div>
+              <b>${c.user}：</b>${c.text}
+              <button class="admin-btn" onclick="deleteComment(${index})">刪除</button>
+              <button class="admin-btn admin-reply-btn" onclick="replyComment(${index})">回覆</button>
+            </div>
+            ${replyHtml}
+          </div>
+        `;
+      });
+    }
+
+    // 訪客新增留言
+    function addComment() {
+      const input = document.getElementById('comment-text');
+      const text = input.value.trim();
+      if (text !== "") {
+        comments.unshift({ id: Date.now(), user: '訪客', text: text, reply: '' });
+        localStorage.setItem('acc_comments', JSON.stringify(comments));
+        renderComments();
+        input.value = "";
+      }
+    }
+
+    // 管理員回覆留言
+    function replyComment(index) {
+      const replyText = prompt("請輸入店主回覆內容：");
+      if (replyText !== null && replyText.trim() !== "") {
+        comments[index].reply = replyText.trim();
+        localStorage.setItem('acc_comments', JSON.stringify(comments));
+        renderComments();
+      }
+    }
+
+    // 管理員刪除留言
+    function deleteComment(index) {
+      if (confirm('確定刪除這條留言？')) {
+        comments.splice(index, 1);
+        localStorage.setItem('acc_comments', JSON.stringify(comments));
+        renderComments();
+      }
+    }
+
+    // 管理員切換（含密碼）
     function toggleAdmin() {
       const app = document.getElementById('app');
-      const isAlreadyAdmin = app.classList.contains('admin-mode');
-
-      if (isAlreadyAdmin) {
-        // 如果已經在管理員模式，點擊直接退出
+      if (app.classList.contains('admin-mode')) {
         app.classList.remove('admin-mode');
       } else {
-        // 彈出密碼輸入框
         const pwd = prompt("請輸入管理員密碼：");
         if (pwd === ADMIN_PASSWORD) {
           app.classList.add('admin-mode');
         } else if (pwd !== null) {
-          alert("密碼錯誤！無法進入後台。");
+          alert("密碼錯誤！");
         }
       }
     }
@@ -272,17 +327,9 @@
       document.getElementById('total-price').innerText = v1 + v2 + v3;
     }
 
-    // 留言板
-    function addComment() {
-      const input = document.getElementById('comment-text');
-      if (input.value.trim()) {
-        const list = document.getElementById('comment-list');
-        list.innerHTML = `<div class="comment-item"><b>訪客：</b>${input.value}</div>` + list.innerHTML;
-        input.value = '';
-      }
-    }
-
+    // 初始載入
     renderProducts();
+    renderComments();
   </script>
 </body>
 </html>
