@@ -45,7 +45,7 @@
     .admin-panel { display: none; background: #faf3f0; border: 1px dashed var(--primary-accent); padding: 14px; border-radius: 14px; margin-bottom: 16px; }
     .admin-mode .admin-panel { display: block; }
     .admin-panel label { font-size: 0.8rem; font-weight: bold; color: var(--text-main); display: block; margin-top: 8px; margin-bottom: 4px; }
-    .admin-panel input { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; background: white; }
+    .admin-panel input, .admin-panel textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; background: white; }
     .admin-panel button { width: 100%; padding: 10px; background: var(--primary-accent); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 12px; cursor: pointer; }
 
     /* 產品展示區與圖片尺寸控制 */
@@ -117,13 +117,13 @@
 
       <!-- 管理員面板 -->
       <div class="admin-panel">
-        <b style="font-size:0.9rem; color:var(--primary-accent);">＋ 上架新雜貨 (全平台同步)</b>
+        <b style="font-size:0.9rem; color:var(--primary-accent);">＋ 上架新雜貨 (草稿自動保存)</b>
         <label>物品名稱</label>
-        <input type="text" id="p-title" placeholder="例如：德國保濕乳霜">
+        <input type="text" id="p-title" placeholder="例如：草本滋養護髮素" oninput="saveDraft()">
         <label>價格 (HK$)</label>
-        <input type="number" id="p-price" placeholder="例如：88">
+        <input type="number" id="p-price" placeholder="例如：88" oninput="saveDraft()">
         <label>物品簡述</label>
-        <input type="text" id="p-desc" placeholder="例如：全新未拆，平放求清空間">
+        <textarea id="p-desc" rows="3" placeholder="例如：深層修護受損髮質..." oninput="saveDraft()"></textarea>
         <label>選取相片</label>
         <input type="file" id="p-file" accept="image/*">
         <button onclick="addProduct()">確認上架並同步雲端</button>
@@ -177,6 +177,35 @@
 
     let products = [];
     let comments = [];
+
+    // 自動保存輸入框草稿
+    function saveDraft() {
+      const draft = {
+        title: document.getElementById('p-title').value,
+        price: document.getElementById('p-price').value,
+        desc: document.getElementById('p-desc').value
+      };
+      localStorage.setItem('input_draft', JSON.stringify(draft));
+    }
+
+    // 恢復輸入框草稿
+    function loadDraft() {
+      const draft = JSON.parse(localStorage.getItem('input_draft'));
+      if (draft) {
+        document.getElementById('p-title').value = draft.title || '';
+        document.getElementById('p-price').value = draft.price || '';
+        document.getElementById('p-desc').value = draft.desc || '';
+      }
+    }
+
+    // 清空草稿
+    function clearDraft() {
+      localStorage.removeItem('input_draft');
+      document.getElementById('p-title').value = '';
+      document.getElementById('p-price').value = '';
+      document.getElementById('p-desc').value = '';
+      document.getElementById('p-file').value = '';
+    }
 
     // 從雲端載入資料
     async function loadCloudProducts() {
@@ -275,7 +304,7 @@
       });
     }
 
-    // 新增留言 (自動辨識是否已解鎖管理員權限)
+    // 新增留言
     function addComment() {
       const input = document.getElementById('comment-text');
       const text = input.value.trim();
@@ -352,17 +381,14 @@
       if (fileInput.files && fileInput.files[0]) {
         compressImage(fileInput.files[0], function (compressedBase64) {
           products.unshift({ id: Date.now(), title, price, desc, img: compressedBase64 });
+          clearDraft();
           syncToCloud();
         });
       } else {
         products.unshift({ id: Date.now(), title, price, desc, img: 'https://via.placeholder.com/75?text=無圖' });
+        clearDraft();
         syncToCloud();
       }
-
-      document.getElementById('p-title').value = '';
-      document.getElementById('p-price').value = '';
-      document.getElementById('p-desc').value = '';
-      document.getElementById('p-file').value = '';
     }
 
     // 刪除商品
@@ -373,16 +399,26 @@
       }
     }
 
-    // 開關管理模式
+    // 開關管理模式 (並自動登入狀態記憶)
     function toggleAdmin() {
       const app = document.getElementById('app');
       if (app.classList.contains('admin-mode')) {
         app.classList.remove('admin-mode');
+        localStorage.removeItem('is_admin');
       } else {
         const pwd = prompt("請輸入管理員密碼：");
-        if (pwd === ADMIN_PASSWORD) app.classList.add('admin-mode');
-        else if (pwd !== null) alert("密碼錯誤！");
+        if (pwd === ADMIN_PASSWORD) {
+          app.classList.add('admin-mode');
+          localStorage.setItem('is_admin', 'true');
+        } else if (pwd !== null) {
+          alert("密碼錯誤！");
+        }
       }
+    }
+
+    // 檢查管理員自動登入狀態
+    if (localStorage.getItem('is_admin') === 'true') {
+      document.getElementById('app').classList.add('admin-mode');
     }
 
     // 計算器功能
@@ -393,6 +429,7 @@
       document.getElementById('total-price').innerText = v1 + v2 + v3;
     }
 
+    loadDraft();
     loadCloudProducts();
   </script>
 </body>
