@@ -109,8 +109,8 @@
         <input type="number" id="p-price" placeholder="例如：88">
         <label>物品簡述</label>
         <input type="text" id="p-desc" placeholder="例如：全新未拆，平放求清空間">
-        <label>選取相片</label>
-        <input type="file" id="p-file" accept="image/*">
+        <label>圖片網址 (選填，留空出預設圖)</label>
+        <input type="text" id="p-img-url" placeholder="例如：https://... (貼上圖片連結)">
         <button onclick="addProduct()">確認上架並同步雲端</button>
       </div>
 
@@ -145,7 +145,7 @@
     const ADMIN_PASSWORD = "1234";
     const PHONE_NUMBER = "85291703190";
     
-    // 嵌入您的 JSONBin 密鑰與 ID
+    // 您的 JSONBin 密鑰與 ID
     const JSONBIN_KEY = "$2a$10$x.X90jhrBmQ7zuP2zwrNNOdR28TGNH3EfUCtevUKZVQkeLaiMXYF6";
     const BIN_ID = "6a9e326effd5d16053e791d3";
 
@@ -170,7 +170,7 @@
     async function syncToCloud() {
       document.getElementById('product-list').innerHTML = '<div class="loading-tip">正在同步到雲端...</div>';
       try {
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
           headers: {
             "Content-Type": "application/json",
@@ -178,10 +178,16 @@
           },
           body: JSON.stringify({ products: products })
         });
+        
+        if (!res.ok) {
+          throw new Error('伺服器拒絕接收，可能資料庫出現錯誤！');
+        }
+
         renderProducts();
         alert('雲端同步成功！所有人開啟網頁都能看到最新物品。');
       } catch (e) {
-        alert('同步失敗，請檢查網路連線。');
+        alert('同步失敗：' + e.message);
+        products.shift(); // 如果失敗，撤銷啱啱加嗰件貨
         renderProducts();
       }
     }
@@ -226,26 +232,19 @@
       const title = document.getElementById('p-title').value.trim();
       const price = document.getElementById('p-price').value.trim();
       const desc = document.getElementById('p-desc').value.trim();
-      const fileInput = document.getElementById('p-file');
+      const imgUrl = document.getElementById('p-img-url').value.trim();
 
       if (!title || !price) return alert('請填寫名稱與價格');
 
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          products.unshift({ id: Date.now(), title, price, desc, img: e.target.result });
-          syncToCloud();
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        products.unshift({ id: Date.now(), title, price, desc, img: 'https://via.placeholder.com/75?text=無圖' });
-        syncToCloud();
-      }
+      const finalImg = imgUrl ? imgUrl : 'https://via.placeholder.com/75?text=無圖';
+      
+      products.unshift({ id: Date.now(), title, price, desc, img: finalImg });
+      syncToCloud();
 
       document.getElementById('p-title').value = '';
       document.getElementById('p-price').value = '';
       document.getElementById('p-desc').value = '';
-      document.getElementById('p-file').value = '';
+      document.getElementById('p-img-url').value = '';
     }
 
     // 刪除商品
