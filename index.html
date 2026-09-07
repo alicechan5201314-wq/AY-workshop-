@@ -178,7 +178,7 @@
     let products = [];
     let comments = [];
 
-    // 從雲端載入資料 (包含商品與留言)
+    // 從雲端載入資料
     async function loadCloudProducts() {
       const list = document.getElementById('product-list');
       try {
@@ -187,9 +187,7 @@
         });
         const data = await res.json();
         products = data.record.products || [];
-        comments = data.record.comments || [
-          { id: 1, user: '買家', text: '請問可以在地鐵站交收嗎？', reply: '可以的，詳情可以點擊 WhatsApp 聯絡～' }
-        ];
+        comments = data.record.comments || [];
         renderProducts();
         renderComments();
       } catch (e) {
@@ -262,10 +260,12 @@
 
       comments.forEach((c, index) => {
         const replyHtml = c.reply ? `<div class="comment-reply"><b>店主回覆：</b>${c.reply}</div>` : '';
+        const userTag = c.user === '店主' ? '<b style="color:var(--primary-accent);">店主：</b>' : `<b>${c.user}：</b>`;
+        
         list.innerHTML += `
           <div class="comment-item">
             <div>
-              <b>${c.user}：</b>${c.text}
+              ${userTag}${c.text}
               <button class="admin-del-btn" onclick="deleteComment(${index})">刪除</button>
               <button class="admin-del-btn admin-reply-btn" onclick="replyComment(${index})">回覆</button>
             </div>
@@ -275,12 +275,15 @@
       });
     }
 
-    // 新增留言
+    // 新增留言 (自動辨識是否已解鎖管理員權限)
     function addComment() {
       const input = document.getElementById('comment-text');
       const text = input.value.trim();
       if (text !== "") {
-        comments.unshift({ id: Date.now(), user: '訪客', text: text, reply: '' });
+        const isAdmin = document.getElementById('app').classList.contains('admin-mode');
+        const role = isAdmin ? '店主' : '訪客';
+        
+        comments.unshift({ id: Date.now(), user: role, text: text, reply: '' });
         input.value = "";
         syncToCloud();
       }
