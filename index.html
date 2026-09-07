@@ -48,7 +48,7 @@
     .admin-panel input { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; background: white; }
     .admin-panel button { width: 100%; padding: 10px; background: var(--primary-accent); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 12px; cursor: pointer; }
 
-    /* 產品展示區與圖片尺寸嚴格限制 */
+    /* 產品展示區與圖片尺寸控制 */
     .product-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color); align-items: center; }
     .product-item:last-child { border-bottom: none; }
     
@@ -84,13 +84,16 @@
     /* WhatsApp 區 */
     .whatsapp-btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-accent); color: white; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.9rem; }
 
-    /* 計算器與留言板 */
-    .calc-row, .comment-input-group { display: flex; gap: 8px; margin-bottom: 8px; }
-    .calc-input, .comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background-color: #faf7f5; font-size: 0.9rem; outline: none; }
-    .calc-btn, .comment-submit { padding: 10px 16px; background-color: var(--primary-accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    /* 計算器樣式 */
+    .calc-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .calc-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background-color: #faf7f5; font-size: 0.9rem; outline: none; }
+    .calc-btn { padding: 10px 16px; background-color: var(--primary-accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
     .calc-result { margin-top: 10px; padding: 12px; background-color: var(--tag-bg); border-radius: 10px; text-align: center; font-weight: 600; }
-    
+
     /* 留言板樣式 */
+    .comment-input-group { display: flex; gap: 8px; margin-bottom: 8px; }
+    .comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background-color: #faf7f5; font-size: 0.9rem; outline: none; }
+    .comment-submit { padding: 10px 16px; background-color: var(--primary-accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
     .comment-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
     .comment-item { padding: 10px 12px; background-color: #faf7f5; border-radius: 10px; font-size: 0.8rem; position: relative; }
     .comment-reply { margin-top: 6px; padding: 6px 10px; background-color: #f0e6e1; border-radius: 6px; color: var(--text-main); font-size: 0.78rem; }
@@ -101,15 +104,18 @@
 
   <div class="app-container" id="app">
     
+    <!-- 頁頭標題 -->
     <div class="header-card">
       <button class="admin-icon-btn" onclick="toggleAdmin()" title="後台管理">⚙️</button>
       <h1>A Care Corner｜懶人精緻選物所</h1>
       <p>日常好物與精選雜貨</p>
     </div>
 
+    <!-- 1. 雜貨目錄 -->
     <div class="section-card">
       <div class="section-title">🛍️ 待售雜貨目錄</div>
 
+      <!-- 管理員面板 -->
       <div class="admin-panel">
         <b style="font-size:0.9rem; color:var(--primary-accent);">＋ 上架新雜貨 (全平台同步)</b>
         <label>物品名稱</label>
@@ -120,4 +126,271 @@
         <input type="text" id="p-desc" placeholder="例如：全新未拆，平放求清空間">
         <label>選取相片</label>
         <input type="file" id="p-file" accept="image/*">
-        <button onclick="addProduct()">確認
+        <button onclick="addProduct()">確認上架並同步雲端</button>
+      </div>
+
+      <div id="product-list">
+        <div class="loading-tip">雲端資料同步中...</div>
+      </div>
+    </div>
+
+    <!-- 2. WhatsApp 一般查詢 -->
+    <div class="section-card">
+      <div class="section-title">💬 一般問題查詢</div>
+      <a href="https://api.whatsapp.com/send?phone=85291703190&text=你好！想查詢關於 A Care Corner 的相關問題。" target="_blank" class="whatsapp-btn">
+        💬 一鍵聯絡店主查詢
+      </a>
+    </div>
+
+    <!-- 3. 計算器 -->
+    <div class="section-card">
+      <div class="section-title">🧮 幾件合購總額計算器</div>
+      <div class="calc-row">
+        <input type="number" id="num1" class="calc-input" placeholder="物品 1 金額 ($)">
+        <input type="number" id="num2" class="calc-input" placeholder="物品 2 金額 ($)">
+      </div>
+      <div class="calc-row">
+        <input type="number" id="num3" class="calc-input" placeholder="物品 3 金額 ($)">
+        <button onclick="calculateTotal()" class="calc-btn" style="width:100%;">計算總額</button>
+      </div>
+      <div class="calc-result">預估總金額： HK$ <span id="total-price">0</span></div>
+    </div>
+
+    <!-- 4. 買家留言板 -->
+    <div class="section-card">
+      <div class="section-title">📝 買家留言板</div>
+      <div class="comment-input-group">
+        <input type="text" id="comment-text" class="comment-input" placeholder="寫下您的查詢或建議...">
+        <button onclick="addComment()" class="comment-submit">送出</button>
+      </div>
+      <div class="comment-list" id="comment-list"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "1234";
+    const PHONE_NUMBER = "85291703190";
+    
+    const JSONBIN_KEY = "$2a$10$x.X90jhrBmQ7zuP2zwrNNOdR28TGNH3EfUCtevUKZVQkeLaiMXYF6";
+    const BIN_ID = "6a9e326effd5d16053e791d3";
+
+    let products = [];
+    let comments = [];
+
+    // 從雲端載入資料 (包含商品與留言)
+    async function loadCloudProducts() {
+      const list = document.getElementById('product-list');
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { "X-Master-Key": JSONBIN_KEY }
+        });
+        const data = await res.json();
+        products = data.record.products || [];
+        comments = data.record.comments || [
+          { id: 1, user: '買家', text: '請問可以在地鐵站交收嗎？', reply: '可以的，詳情可以點擊 WhatsApp 聯絡～' }
+        ];
+        renderProducts();
+        renderComments();
+      } catch (e) {
+        list.innerHTML = '<div class="loading-tip">無法連接雲端資料庫，請稍後再試。</div>';
+      }
+    }
+
+    // 儲存商品與留言到雲端
+    async function syncToCloud() {
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": JSONBIN_KEY
+          },
+          body: JSON.stringify({ products: products, comments: comments })
+        });
+        renderProducts();
+        renderComments();
+      } catch (e) {
+        alert('同步失敗，請檢查網路連線。');
+      }
+    }
+
+    // 渲染商品列表
+    function renderProducts() {
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+
+      if (products.length === 0) {
+        list.innerHTML = '<div class="loading-tip">目前暫無待售物品，請點擊右上角 ⚙️ 上架物品。</div>';
+        return;
+      }
+
+      products.forEach((p, index) => {
+        const waText = encodeURIComponent(`你好！我想查詢「${p.title}」是否有貨？`);
+        const waLink = `https://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${waText}`;
+
+        list.innerHTML += `
+          <div class="product-item">
+            <img src="${p.img}" class="product-img" alt="${p.title}" onerror="this.src='https://via.placeholder.com/75?text=無圖'">
+            <div class="product-info">
+              <div>
+                <div class="product-title">
+                  ${p.title} 
+                  <button class="admin-del-btn" onclick="deleteProduct(${index})">下架</button>
+                </div>
+                <div class="product-price">HK$ ${p.price}</div>
+                <div class="product-desc">${p.desc}</div>
+              </div>
+              <div class="product-action">
+                <a href="${waLink}" target="_blank" class="inquire-link">私訊查詢 💬</a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // 渲染留言板
+    function renderComments() {
+      const list = document.getElementById('comment-list');
+      list.innerHTML = '';
+
+      if (comments.length === 0) {
+        list.innerHTML = '<div class="loading-tip">暫無留言</div>';
+        return;
+      }
+
+      comments.forEach((c, index) => {
+        const replyHtml = c.reply ? `<div class="comment-reply"><b>店主回覆：</b>${c.reply}</div>` : '';
+        list.innerHTML += `
+          <div class="comment-item">
+            <div>
+              <b>${c.user}：</b>${c.text}
+              <button class="admin-del-btn" onclick="deleteComment(${index})">刪除</button>
+              <button class="admin-del-btn admin-reply-btn" onclick="replyComment(${index})">回覆</button>
+            </div>
+            ${replyHtml}
+          </div>
+        `;
+      });
+    }
+
+    // 新增留言
+    function addComment() {
+      const input = document.getElementById('comment-text');
+      const text = input.value.trim();
+      if (text !== "") {
+        comments.unshift({ id: Date.now(), user: '訪客', text: text, reply: '' });
+        input.value = "";
+        syncToCloud();
+      }
+    }
+
+    // 回覆留言
+    function replyComment(index) {
+      const replyText = prompt("請輸入店主回覆內容：");
+      if (replyText !== null && replyText.trim() !== "") {
+        comments[index].reply = replyText.trim();
+        syncToCloud();
+      }
+    }
+
+    // 刪除留言
+    function deleteComment(index) {
+      if (confirm('確定刪除這條留言？')) {
+        comments.splice(index, 1);
+        syncToCloud();
+      }
+    }
+
+    // 自動壓縮相片大小
+    function compressImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          const max_size = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > max_size) {
+              height *= max_size / width;
+              width = max_size;
+            }
+          } else {
+            if (height > max_size) {
+              width *= max_size / height;
+              height = max_size;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 新增商品
+    function addProduct() {
+      const title = document.getElementById('p-title').value.trim();
+      const price = document.getElementById('p-price').value.trim();
+      const desc = document.getElementById('p-desc').value.trim();
+      const fileInput = document.getElementById('p-file');
+
+      if (!title || !price) return alert('請填寫名稱與價格');
+
+      if (fileInput.files && fileInput.files[0]) {
+        compressImage(fileInput.files[0], function (compressedBase64) {
+          products.unshift({ id: Date.now(), title, price, desc, img: compressedBase64 });
+          syncToCloud();
+        });
+      } else {
+        products.unshift({ id: Date.now(), title, price, desc, img: 'https://via.placeholder.com/75?text=無圖' });
+        syncToCloud();
+      }
+
+      document.getElementById('p-title').value = '';
+      document.getElementById('p-price').value = '';
+      document.getElementById('p-desc').value = '';
+      document.getElementById('p-file').value = '';
+    }
+
+    // 刪除商品
+    function deleteProduct(index) {
+      if (confirm('確定下架這件物品？')) {
+        products.splice(index, 1);
+        syncToCloud();
+      }
+    }
+
+    // 開關管理模式
+    function toggleAdmin() {
+      const app = document.getElementById('app');
+      if (app.classList.contains('admin-mode')) {
+        app.classList.remove('admin-mode');
+      } else {
+        const pwd = prompt("請輸入管理員密碼：");
+        if (pwd === ADMIN_PASSWORD) app.classList.add('admin-mode');
+        else if (pwd !== null) alert("密碼錯誤！");
+      }
+    }
+
+    // 計算器功能
+    function calculateTotal() {
+      const v1 = parseFloat(document.getElementById('num1').value) || 0;
+      const v2 = parseFloat(document.getElementById('num2').value) || 0;
+      const v3 = parseFloat(document.getElementById('num3').value) || 0;
+      document.getElementById('total-price').innerText = v1 + v2 + v3;
+    }
+
+    loadCloudProducts();
+  </script>
+</body>
+</html>
