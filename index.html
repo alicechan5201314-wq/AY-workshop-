@@ -20,7 +20,7 @@
     body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; padding: 20px 12px; }
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
 
-    /* 頁頭標題 */
+    /* 頁頭區 */
     .header-card { 
       background-color: var(--card-bg); 
       padding: 22px 40px 20px 20px; 
@@ -32,7 +32,6 @@
     .header-card h1 { font-size: 1.25rem; color: var(--primary-accent); word-break: break-word; line-height: 1.3; }
     .header-card p { font-size: 0.85rem; color: var(--text-sub); margin-top: 6px; }
     
-    /* 後台管理 Icon 按鈕 */
     .admin-icon-btn {
       position: absolute; 
       top: 16px; 
@@ -53,7 +52,7 @@
     .section-card { background-color: var(--card-bg); padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
 
-    /* 後台面板 */
+    /* 後台新增商品控制板 */
     .admin-panel { display: none; background: #faf3f0; border: 1px dashed var(--primary-accent); padding: 14px; border-radius: 14px; margin-bottom: 16px; }
     .admin-mode .admin-panel { display: block; }
     .admin-panel label { font-size: 0.8rem; font-weight: bold; color: var(--text-main); display: block; margin-top: 8px; margin-bottom: 4px; }
@@ -67,7 +66,7 @@
     .product-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .product-title { font-size: 0.95rem; font-weight: 600; }
     .product-price { font-size: 0.85rem; color: #b85b5b; font-weight: bold; margin-top: 2px; }
-    .product-desc { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; }
+    .product-desc { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; white-space: pre-line; }
     .product-action { display: flex; justify-content: flex-end; margin-top: 6px; }
     
     .inquire-link {
@@ -75,10 +74,8 @@
       text-decoration: none; font-weight: 600; padding: 6px 12px; border-radius: 8px;
     }
 
-    /* 管理員專用刪除/回覆按鈕 */
-    .admin-btn { display: none; background: #e06d6d; color: white; border: none; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; margin-left: 4px; }
-    .admin-reply-btn { background: var(--primary-accent); }
-    .admin-mode .admin-btn { display: inline-block; }
+    .admin-del-btn { display: none; background: #e06d6d; color: white; border: none; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; float: right; }
+    .admin-mode .admin-del-btn { display: inline-block; }
 
     /* WhatsApp 區 */
     .whatsapp-btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-accent); color: white; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.9rem; }
@@ -88,12 +85,7 @@
     .calc-input, .comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background-color: #faf7f5; font-size: 0.9rem; outline: none; }
     .calc-btn, .comment-submit { padding: 10px 16px; background-color: var(--primary-accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
     .calc-result { margin-top: 10px; padding: 12px; background-color: var(--tag-bg); border-radius: 10px; text-align: center; font-weight: 600; }
-    
-    /* 留言板列表 */
-    .comment-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
-    .comment-item { padding: 10px 12px; background-color: #faf7f5; border-radius: 10px; font-size: 0.8rem; position: relative; }
-    .comment-reply { margin-top: 6px; padding: 6px 10px; background-color: #f0e6e1; border-radius: 6px; color: var(--text-main); font-size: 0.78rem; }
-    .empty-tip { font-size: 0.8rem; color: var(--text-sub); text-align: center; padding: 10px 0; }
+    .loading-tip { text-align: center; color: var(--text-sub); font-size: 0.85rem; padding: 20px 0; }
   </style>
 </head>
 <body>
@@ -110,24 +102,21 @@
       <div class="section-title">🛍️ 待售雜貨目錄</div>
 
       <div class="admin-panel">
-        <b style="font-size:0.9rem; color:var(--primary-accent);">＋ 上架新雜貨</b>
-        
+        <b style="font-size:0.9rem; color:var(--primary-accent);">＋ 上架新雜貨 (全平台同步)</b>
         <label>物品名稱</label>
-        <input type="text" id="p-title" placeholder="例如：3M 醫療膠帶">
-        
+        <input type="text" id="p-title" placeholder="例如：德國保濕乳霜">
         <label>價格 (HK$)</label>
-        <input type="number" id="p-price" placeholder="例如：15">
-        
+        <input type="number" id="p-price" placeholder="例如：88">
         <label>物品簡述</label>
-        <input type="text" id="p-desc" placeholder="例如：全新未拆，多買轉讓">
-        
-        <label>上傳相片</label>
+        <input type="text" id="p-desc" placeholder="例如：全新未拆，平放求清空間">
+        <label>選取相片</label>
         <input type="file" id="p-file" accept="image/*">
-
-        <button onclick="addProduct()">確認上架物品</button>
+        <button onclick="addProduct()">確認上架並同步雲端</button>
       </div>
 
-      <div id="product-list"></div>
+      <div id="product-list">
+        <div class="loading-tip">雲端資料同步中...</div>
+      </div>
     </div>
 
     <div class="section-card">
@@ -150,34 +139,60 @@
       <div class="calc-result">預估總金額： HK$ <span id="total-price">0</span></div>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">📝 買家留言板</div>
-      <div class="comment-input-group">
-        <input type="text" id="comment-text" class="comment-input" placeholder="寫下您的查詢或建議...">
-        <button onclick="addComment()" class="comment-submit">送出</button>
-      </div>
-      <div class="comment-list" id="comment-list"></div>
-    </div>
-
   </div>
 
   <script>
-    const ADMIN_PASSWORD = "0129"; 
+    const ADMIN_PASSWORD = "1234";
     const PHONE_NUMBER = "85291703190";
+    
+    // 嵌入您的 JSONBin 密鑰與 ID
+    const JSONBIN_KEY = "$2a$10$x.X90jhrBmQ7zuP2zwrNNOdR28TGNH3EfUCtevUKZVQkeLaiMXYF6";
+    const BIN_ID = "6a9e326effd5d16053e791d3";
 
-    // 從本地讀取商品與留言資料
-    let products = JSON.parse(localStorage.getItem('acc_products')) || [];
-    let comments = JSON.parse(localStorage.getItem('acc_comments')) || [
-      { id: 1, user: '買家', text: '請問洗頭水可以在地鐵站交收嗎？', reply: '可以的，詳情可以點擊 WhatsApp 聯絡～' }
-    ];
+    let products = [];
 
-    // 渲染商品
+    // 從雲端載入資料
+    async function loadCloudProducts() {
+      const list = document.getElementById('product-list');
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { "X-Master-Key": JSONBIN_KEY }
+        });
+        const data = await res.json();
+        products = data.record.products || [];
+        renderProducts();
+      } catch (e) {
+        list.innerHTML = '<div class="loading-tip">無法連接雲端資料庫，請稍後再試。</div>';
+      }
+    }
+
+    // 儲存到雲端
+    async function syncToCloud() {
+      document.getElementById('product-list').innerHTML = '<div class="loading-tip">正在同步到雲端...</div>';
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": JSONBIN_KEY
+          },
+          body: JSON.stringify({ products: products })
+        });
+        renderProducts();
+        alert('雲端同步成功！所有人開啟網頁都能看到最新物品。');
+      } catch (e) {
+        alert('同步失敗，請檢查網路連線。');
+        renderProducts();
+      }
+    }
+
+    // 渲染商品列表
     function renderProducts() {
       const list = document.getElementById('product-list');
       list.innerHTML = '';
-      
+
       if (products.length === 0) {
-        list.innerHTML = '<div class="empty-tip">目前暫無待售物品，請點擊右上角 ⚙️ 上架物品。</div>';
+        list.innerHTML = '<div class="loading-tip">目前暫無待售物品，請點擊右上角 ⚙️ 上架物品。</div>';
         return;
       }
 
@@ -187,12 +202,12 @@
 
         list.innerHTML += `
           <div class="product-item">
-            <img src="${p.img}" class="product-img" alt="${p.title}">
+            <img src="${p.img}" class="product-img" alt="${p.title}" onerror="this.src='https://via.placeholder.com/75?text=無圖'">
             <div class="product-info">
               <div>
                 <div class="product-title">
                   ${p.title} 
-                  <button class="admin-btn" onclick="deleteProduct(${index})">下架</button>
+                  <button class="admin-del-btn" onclick="deleteProduct(${index})">下架</button>
                 </div>
                 <div class="product-price">HK$ ${p.price}</div>
                 <div class="product-desc">${p.desc}</div>
@@ -213,109 +228,43 @@
       const desc = document.getElementById('p-desc').value.trim();
       const fileInput = document.getElementById('p-file');
 
-      if (!title || !price) {
-        return alert('請至少填寫「物品名稱」與「價格」！');
-      }
+      if (!title || !price) return alert('請填寫名稱與價格');
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          saveProductData(title, price, desc, e.target.result);
+          products.unshift({ id: Date.now(), title, price, desc, img: e.target.result });
+          syncToCloud();
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        saveProductData(title, price, desc, 'https://via.placeholder.com/75/f5ebe6/4a423e?text=雜貨');
+        products.unshift({ id: Date.now(), title, price, desc, img: 'https://via.placeholder.com/75?text=無圖' });
+        syncToCloud();
       }
-    }
-
-    function saveProductData(title, price, desc, imgData) {
-      products.unshift({ id: Date.now(), title, price, desc, img: imgData });
-      localStorage.setItem('acc_products', JSON.stringify(products));
-      renderProducts();
 
       document.getElementById('p-title').value = '';
       document.getElementById('p-price').value = '';
       document.getElementById('p-desc').value = '';
       document.getElementById('p-file').value = '';
-      alert('成功上架物品！');
     }
 
+    // 刪除商品
     function deleteProduct(index) {
       if (confirm('確定下架這件物品？')) {
         products.splice(index, 1);
-        localStorage.setItem('acc_products', JSON.stringify(products));
-        renderProducts();
+        syncToCloud();
       }
     }
 
-    // 渲染留言板
-    function renderComments() {
-      const list = document.getElementById('comment-list');
-      list.innerHTML = '';
-
-      if (comments.length === 0) {
-        list.innerHTML = '<div class="empty-tip">暫無留言</div>';
-        return;
-      }
-
-      comments.forEach((c, index) => {
-        const replyHtml = c.reply ? `<div class="comment-reply"><b>店主回覆：</b>${c.reply}</div>` : '';
-        list.innerHTML += `
-          <div class="comment-item">
-            <div>
-              <b>${c.user}：</b>${c.text}
-              <button class="admin-btn" onclick="deleteComment(${index})">刪除</button>
-              <button class="admin-btn admin-reply-btn" onclick="replyComment(${index})">回覆</button>
-            </div>
-            ${replyHtml}
-          </div>
-        `;
-      });
-    }
-
-    // 訪客新增留言
-    function addComment() {
-      const input = document.getElementById('comment-text');
-      const text = input.value.trim();
-      if (text !== "") {
-        comments.unshift({ id: Date.now(), user: '訪客', text: text, reply: '' });
-        localStorage.setItem('acc_comments', JSON.stringify(comments));
-        renderComments();
-        input.value = "";
-      }
-    }
-
-    // 管理員回覆留言
-    function replyComment(index) {
-      const replyText = prompt("請輸入店主回覆內容：");
-      if (replyText !== null && replyText.trim() !== "") {
-        comments[index].reply = replyText.trim();
-        localStorage.setItem('acc_comments', JSON.stringify(comments));
-        renderComments();
-      }
-    }
-
-    // 管理員刪除留言
-    function deleteComment(index) {
-      if (confirm('確定刪除這條留言？')) {
-        comments.splice(index, 1);
-        localStorage.setItem('acc_comments', JSON.stringify(comments));
-        renderComments();
-      }
-    }
-
-    // 管理員切換（含密碼）
+    // 開關管理模式
     function toggleAdmin() {
       const app = document.getElementById('app');
       if (app.classList.contains('admin-mode')) {
         app.classList.remove('admin-mode');
       } else {
         const pwd = prompt("請輸入管理員密碼：");
-        if (pwd === ADMIN_PASSWORD) {
-          app.classList.add('admin-mode');
-        } else if (pwd !== null) {
-          alert("密碼錯誤！");
-        }
+        if (pwd === ADMIN_PASSWORD) app.classList.add('admin-mode');
+        else if (pwd !== null) alert("密碼錯誤！");
       }
     }
 
@@ -328,8 +277,7 @@
     }
 
     // 初始載入
-    renderProducts();
-    renderComments();
+    loadCloudProducts();
   </script>
 </body>
 </html>
